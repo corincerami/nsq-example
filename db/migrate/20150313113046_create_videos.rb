@@ -3,6 +3,7 @@ class CreateVideos < ActiveRecord::Migration
     create_table :videos do |t|
       t.string :video_uuid
       t.decimal :play_count, default: 0
+      t.timestamps
     end
 
     add_index(:videos, :video_uuid)

@@ -17,8 +17,10 @@ ActiveRecord::Schema.define(version: 20150313113046) do
   enable_extension "plpgsql"
 
   create_table "videos", force: :cascade do |t|
-    t.string  "video_uuid"
-    t.decimal "play_count", default: 0.0
+    t.string   "video_uuid"
+    t.decimal  "play_count", default: 0.0
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   add_index "videos", ["video_uuid"], name: "index_videos_on_video_uuid", using: :btree
