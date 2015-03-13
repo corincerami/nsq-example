@@ -9,5 +9,5 @@ end
 
 # create 100 Videos in the database, each with a unique UUID
 videos.each do |video|
-  Video.find_or_create_by(video)
+  Video.find_or_create_by(video_uuid: video)
 end
