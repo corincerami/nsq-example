@@ -1,7 +1,13 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rake db:seed (or created alongside the db with db:setup).
-#
-# Examples:
-#
-#   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
-#   Mayor.create(name: 'Emanuel', city: cities.first)
+require "SecureRandom"
+
+videos = Array.new
+
+# generate 100 unique video_ids
+100.times do
+  videos << SecureRandom.uuid
+end
+
+# create 100 Videos in the database, each with a unique UUID
+videos.each do |video|
+  Video.find_or_create_by(video)
+end
