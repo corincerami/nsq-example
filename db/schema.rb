@@ -11,16 +11,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150313113046) do
+ActiveRecord::Schema.define(version: 20150313195735) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "videos", force: :cascade do |t|
     t.string   "video_uuid"
-    t.decimal  "play_count", default: 0.0
+    t.decimal  "play_count",     default: 0.0
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.datetime "last_viewed_at", default: '2015-03-13 20:16:08'
   end
 
   add_index "videos", ["video_uuid"], name: "index_videos_on_video_uuid", using: :btree
