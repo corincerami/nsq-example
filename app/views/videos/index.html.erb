@@ -4,3 +4,25 @@
 <div>
   Total Plays Sitewide: <%= @total_plays %>
 </div>
+
+<canvas id="myChart" width="1600" height="600"></canvas>
+
+<script>
+  var data = {
+      labels: <%= raw(video_ids = @videos.map { |v| v.video_uuid }) %>,
+      datasets: [
+          {
+              label: "Video Views",
+              fillColor: "rgba(52,152,219,0.5)",
+              strokeColor: "rgba(226,26,227,0.8)",
+              highlightFill: "rgba(220,220,220,0.75)",
+              highlightStroke: "rgba(220,220,220,1)",
+              data: <%= @videos.map { |v| v.play_count.to_i } %>
+          }
+      ]
+  };
+
+  var ctx = $("#myChart").get(0).getContext("2d");
+  var myBarChart = new Chart(ctx).Bar(data, { barShowStroke: true });
+</script>
+
