@@ -29,3 +29,17 @@ I also tried to implement two workers that can be run with Foreman that run both
 ```
 
 Stats on the play counts of each video can be found by running the app on your localhost and navigating to "localhost:3000/videos"
+
+# Post Mortem
+
+First, I'll say that most of the topics dealt with in this challenge were pretty new to me. I was familiar the basic idea of queueing jobs to be run in the background, but it wasn't something I had any experience with. That being said, I really enjoyed this challenge a lot. I feel like I learned so much by being giving a task that was outside of my comfort zone and that's something I love doing.
+
+Over the last couple of days I feel like there were a few rough patches, but in general I really liked doing the necessary research and planning out how to build this system. When I first read the gist with the details of the challenge, I was nervous about whether or not I would be able to complete it, given how unfamiliar I was with NSQ specifically and concepts like queueing and batching in general. After a few hours though I felt relatively comfortable working on this, and spent a lot of time after that tweaking and tuning things the way I needed them.
+
+I found it really interesting to learn more about how these sorts of background tasks are handled. For example, I knew that writing to the database can be costly on the server, but I had never really thought about how to optimize an app to reduce the number of calls to the database in this way.
+
+I'm also not sure what the best way is to handle data like this during the interim, when it's been pulled from the queue but hasn't yet been saved to the database. I decided to use the Rails cache in order to store them temporarily, and then once they reach a certain threshold, writing them all at once.
+
+I also haven't done a lot of work using custom rake tasks, so that was another interesting aspect to this. I tried to utilize Foreman to create some workers that would run those tasks continuously so I was always pulling messages from the queue, and checking the cache for new views, but it didn't always run smoothly. While at times it would run continuously and write all 100,000 views, other times it would get interrupted after 5-10k messages without an error message. I'm wondering if it's an issue with how I set up the workers, since I'm able to run the two tasks at the same time in two separate terminals without issue.
+
+There were a lot of interesting things about this challenge and I'm really excited to keep learning and improving on these skills. If you guys have any thoughts or input on my solution, I would love to hear what you have to say.
