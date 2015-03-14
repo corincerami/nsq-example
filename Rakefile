@@ -6,28 +6,18 @@ require File.expand_path('../config/application', __FILE__)
 Rails.application.load_tasks
 
 task queue_plays: :environment do
-  Video.generate_plays.each do |play|
-    uuid = JSON.parse(play)["video_id"]
+  Video.generate_plays(20, 80, 100_000).each do |play|
     Video::PRODUCER.write(play)
+    Nsq.logger.info "#{play} written to NSQ"
   end
-  # this task won't run properly without this pry!
-  # what???
+  # this rake task terminates early without this binding...
+  # i have no idea why adding this in making it work
   binding.pry
 end
 
 task plays_from_queue: :environment do
   while true
-    msg = Video::CONSUMER.pop
-    uuid = JSON.parse(msg.body)["video_id"]
-    video = Video.find_by(video_uuid: uuid)
-    video.update(last_viewed_at: Time.now)
-    if video.play_count < 100
-      video.increment!(:play_count)
-    else
-      count = Rails.cache.read("#{uuid}") || 0
-      Rails.cache.write("#{uuid}", count + 1)
-    end
-    msg.finish
+    Video.plays_from_queue
   end
 end
 
@@ -36,8 +26,9 @@ task plays_from_cache: :environment do
     Video.viewed_recently.each do |video|
       count = Rails.cache.read("#{video.video_uuid}") || 0
       if count >= 99 || Time.now - video.updated_at >= 60
-        video.increment!(:play_count, by = (count + 1))
         Rails.cache.delete("#{video.video_uuid}")
+        video.increment!(:play_count, by = (count + 1))
+        Nsq.logger.info "Video #{video.video_uuid} play count incremented by #{count + 1}"
       end
     end
   end
