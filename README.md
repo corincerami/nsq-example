@@ -8,7 +8,7 @@ In order to set up the database and create videos with unique UUIDs:
   $ rake db:setup
 ```
 
-To create the mock views that will be handled by NSQ and write them to the queue:
+NSQ will need to be running locally, and startup instructions can be found [here](http://nsq.io/overview/quick_start.html). To create the mock views that will be handled by NSQ and write them to the queue:
 
 ```
   $ rake queue_plays
@@ -43,3 +43,13 @@ I'm also not sure what the best way is to handle data like this during the inter
 I also haven't done a lot of work using custom rake tasks, so that was another interesting aspect to this. I tried to utilize Foreman to create some workers that would run those tasks continuously so I was always pulling messages from the queue, and checking the cache for new views, but it didn't always run smoothly. While at times it would run continuously and write all 100,000 views, other times it would get interrupted after 5-10k messages without an error message. I'm wondering if it's an issue with how I set up the workers, since I'm able to run the two tasks at the same time in two separate terminals without issue.
 
 There were a lot of interesting things about this challenge and I'm really excited to keep learning and improving on these skills. If you guys have any thoughts or input on my solution, I would love to hear what you have to say.
+
+EDITED Monday, March 16, 2015
+
+After returning to this challenge in order to correct the way I was batching updates, I have some more insight on what I think about it and what I've learned. One of the biggest improvement I made to the code was to reduce the number of writes to the database by an even greater degree. Previously when pulling from the cache, I was waiting until each individual video had either 100 new views to add, or hadn't been updated in at least a minute. At that point I was increasing it's playcount in the database. I didn't realize that what I should be doing was to update 100 videos all at the same time once per minute.
+
+This made a lot of sense once I realized it, because you can reduce the number of times you write to the database from O(n) operations, where n represents the number of videos that need to be updated, to just 1 update. In order to do this I built a raw SQL statement using ruby to iterate through each video's ID and it's updated playcount.
+
+Unfortunately, I'm still finding the biggest bottleneck in terms of speed to be when working through the queue in order to decide how to deal with each message. I would like to try to find a way to speed this process up further, so I'd like to try to figure out exactly where it's getting slowed down. I suspect it may relate to connecting to NSQ, but I'm not sure yet.
+
+350/sec
