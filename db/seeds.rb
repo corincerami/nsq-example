@@ -8,6 +8,7 @@ videos = Array.new
 end
 
 # create 100 Videos in the database, each with a unique UUID
-videos.each do |video|
-  Video.find_or_create_by(video_uuid: video)
+videos.each do |uuid|
+  video = Video.find_or_create_by(video_uuid: uuid)
+  video.update(last_viewed_at: Time.now)
 end
